@@ -1,10 +1,10 @@
 <resources>
-    <style name="Theme.OpenKoodo" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/koodo_orange</item>
+    <style name="Theme.Dash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dash_primary</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/koodo_orange</item>
+        <item name="colorPrimaryContainer">@color/dash_primary</item>
         <item name="colorOnPrimaryContainer">@color/white</item>
-        <item name="android:statusBarColor">@color/koodo_orange_dark</item>
+        <item name="android:statusBarColor">@color/dash_primary_dark</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

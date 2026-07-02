@@ -1,12 +1,10 @@
-package sh.margot.open_koodo.network
+package sh.margot.dash.services.koodo
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.webkit.CookieManager
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -30,13 +28,6 @@ class KoodoCookieJar : CookieJar {
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> =
         store[url.host]?.filter { it.matches(url) } ?: emptyList()
-
-    fun syncFromWebView(urlStr: String) {
-        val url = urlStr.toHttpUrlOrNull() ?: return
-        val raw = CookieManager.getInstance().getCookie(urlStr) ?: return
-        val parsed = raw.split(";").mapNotNull { Cookie.parse(url, it.trim()) }
-        if (parsed.isNotEmpty()) saveFromResponse(url, parsed)
-    }
 
     fun hasSessionFor(host: String) = !store[host].isNullOrEmpty()
 

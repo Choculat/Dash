@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="koodo_orange">#FF5722</color>
-    <color name="koodo_orange_dark">#E64A19</color>
+    <color name="dash_primary">#3949AB</color>
+    <color name="dash_primary_dark">#283593</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

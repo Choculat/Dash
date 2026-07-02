@@ -2,9 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
-        android:name=".OpenKoodoApp"
+        android:name=".DashApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,10 +13,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OpenKoodo">
+        android:theme="@style/Theme.Dash">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".DashboardActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,9 +25,17 @@
         </activity>
 
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".services.koodo.KoodoLoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".services.smspool.SmsPoolLoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".services.smspool.SmsPoolPlansActivity"
+            android:exported="false" />
 
     </application>
 

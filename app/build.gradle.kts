@@ -10,7 +10,7 @@ val localProps = Properties().apply {
 }
 
 android {
-    namespace = "sh.margot.open_koodo"
+    namespace = "sh.margot.dash"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -18,11 +18,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "sh.margot.open_koodo"
+        applicationId = "sh.margot.dash"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.ktx)
     implementation(libs.swiperefresh)
+    implementation(libs.zxing.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

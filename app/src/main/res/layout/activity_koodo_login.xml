@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="32dp"
-            android:text="Open Koodo"
+            android:text="Koodo Mobile"
             android:textSize="28sp"
             android:textStyle="bold" />
 

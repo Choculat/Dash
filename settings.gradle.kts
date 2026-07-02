@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Open-Koodo"
+rootProject.name = "Dash"
 include(":app")

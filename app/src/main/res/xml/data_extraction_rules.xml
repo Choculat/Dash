@@ -5,15 +5,11 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Encrypted credentials are bound to this device's Keystore key and
+             would be undecryptable ciphertext on any other device/reinstall. -->
+        <exclude domain="sharedpref" path="dash_credentials.xml" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="dash_credentials.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>

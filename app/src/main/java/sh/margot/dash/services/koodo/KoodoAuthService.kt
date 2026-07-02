@@ -1,4 +1,4 @@
-package sh.margot.open_koodo.network
+package sh.margot.dash.services.koodo
 
 import android.net.Uri
 import android.util.Log
@@ -27,7 +27,7 @@ object KoodoAuthService {
 
     data class Profile(val phoneNumber: String?, val twoFactorFlag: Boolean)
 
-    class AuthException(message: String) : Exception(message)
+    class AuthException(message: String, val invalidCredentials: Boolean = false) : Exception(message)
 
     suspend fun login(email: String, password: String): Result<Profile> = withContext(Dispatchers.IO) {
         try {
@@ -37,7 +37,7 @@ object KoodoAuthService {
                 origin = WWW
             )
             if (r1.first == 401 || r1.first == 403)
-                return@withContext Result.failure(AuthException("Invalid email or password"))
+                return@withContext Result.failure(AuthException("Invalid email or password", invalidCredentials = true))
             if (r1.first !in 200..299)
                 return@withContext Result.failure(AuthException("Login failed (${r1.first})"))
 

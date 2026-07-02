@@ -1,9 +1,10 @@
-package sh.margot.open_koodo.network
+package sh.margot.dash.services.koodo
 
 import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,7 +16,9 @@ import java.util.concurrent.TimeUnit
 object KoodoApiClient {
 
     private const val TAG = "KoodoApi"
+    const val SERVICE_ID = "koodo"
     const val BASE_URL = "https://prepaidselfserve.koodomobile.com"
+    val HOST: String = BASE_URL.toHttpUrl().host
     private val JSON = "application/json; charset=utf-8".toMediaType()
 
     val cookieJar = KoodoCookieJar()
@@ -32,10 +35,6 @@ object KoodoApiClient {
 
     suspend fun checkStatus(): Result<JSONObject> =
         post("$BASE_URL/status", JSONObject().put("brand", "koodo"))
-
-    suspend fun getUserDetails(): Result<JSONObject> =
-        proxy("retrieveUserDetails", JSONObject()
-            .put("brandId", BRAND_ID).put("provider", "koodo").put("applicationId", APP_ID))
 
     suspend fun getPlanUsage(): Result<JSONObject> =
         proxy("retrievePlanUsage", JSONObject()

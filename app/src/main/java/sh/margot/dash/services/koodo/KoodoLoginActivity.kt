@@ -1,6 +1,5 @@
-package sh.margot.open_koodo.auth
+package sh.margot.dash.services.koodo
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -9,17 +8,16 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import sh.margot.open_koodo.MainActivity
-import sh.margot.open_koodo.databinding.ActivityLoginBinding
+import sh.margot.dash.databinding.ActivityKoodoLoginBinding
 
-class LoginActivity : AppCompatActivity() {
+class KoodoLoginActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLoginBinding
-    private val viewModel: LoginViewModel by viewModels()
+    private lateinit var binding: ActivityKoodoLoginBinding
+    private val viewModel: KoodoLoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
+        binding = ActivityKoodoLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.loginButton.setOnClickListener { submit() }
@@ -43,22 +41,19 @@ class LoginActivity : AppCompatActivity() {
             viewModel.state.collect { state ->
                 binding.messageText.text = ""
                 when (state) {
-                    is LoginState.Idle           -> viewModel.start()
-                    is LoginState.NeedCredentials -> { showCredentials(); setLoading(false) }
-                    is LoginState.Authenticating  -> setLoading(true)
-                    is LoginState.NeedTwoFactor   -> {
+                    is KoodoLoginState.Idle           -> viewModel.start()
+                    is KoodoLoginState.NeedCredentials -> { showCredentials(); setLoading(false) }
+                    is KoodoLoginState.Authenticating  -> setLoading(true)
+                    is KoodoLoginState.NeedTwoFactor   -> {
                         binding.twoFactorPrompt.text =
                             "Code sent to ${state.phoneMasked}. Enter it below."
                         showTwoFactor()
                         setLoading(false)
                         if (binding.codeInput.text.isNullOrEmpty()) binding.codeInput.requestFocus()
                     }
-                    is LoginState.VerifyingCode   -> setLoading(true)
-                    is LoginState.Success          -> {
-                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                        finish()
-                    }
-                    is LoginState.Error            -> {
+                    is KoodoLoginState.VerifyingCode   -> setLoading(true)
+                    is KoodoLoginState.Success          -> finish()
+                    is KoodoLoginState.Error            -> {
                         setLoading(false)
                         binding.messageText.text = state.message
                     }

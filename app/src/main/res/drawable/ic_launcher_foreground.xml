@@ -1,20 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Source: Tabler Icons — letter-k (tabler.io/icons/icon/letter-k)
-    Original: 24×24 viewBox, stroke-based, scaled 4.5× to 108×108.
-
-    Path anatomy in 24×24 space:
-      M7,4 v16          → vertical bar
-      m0,-8 h2 l8,-8    → junction + upper arm to (17,4)
-      m-8,8 l8,8        → junction + lower arm to (17,20)
-
-    Scaled to 108:  multiply coords × 4.5
-      Vertical bar:  (31.5, 18) → (31.5, 90)
-      Upper arm:     junction (40.5, 54) → (76.5, 18)
-      Lower arm:     junction (40.5, 54) → (76.5, 90)
-
-    Tips land at ~42dp from centre and are clipped by the adaptive icon
-    circle — with round linecaps this gives a natural, polished finish.
+    3×3 grid drawn as an outline (outer border + 2 internal dividers each way),
+    not filled squares. 108×108 canvas, grid box spans 33–75 (42×42), centered,
+    leaving a generous white margin on all sides so it reads as framed rather
+    than edge-to-edge. Divider lines at 33+14=47 and 33+28=61.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -23,11 +12,14 @@
     android:viewportHeight="108">
 
     <path
-        android:pathData="M31.5,18 v72 m0,-36 h9 l36,-36 m-36,36 l36,36"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="10"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
+        android:pathData="M33,33 H75 V75 H33 Z
+                           M47,33 V75
+                           M61,33 V75
+                           M33,47 H75
+                           M33,61 H75"
+        android:strokeColor="#000000"
+        android:strokeWidth="4"
+        android:strokeLineCap="square"
         android:fillColor="@android:color/transparent" />
 
 </vector>
