@@ -14,7 +14,7 @@ I buy a 100 MB eSIM every week for $0.40 USD. Over a year that's **$20.80 USD (~
 
 I also buy the $100 Koodo plan, which comes to **$122.56 CAD** ($100 + $6.60 CAD + QC taxes).
 
-**Total: ~$152.12 CAD per year**, for:
+**Total: ~$152.12 CAD per year (~$12.68 CAD per month)**, for:
 
 - 400 minutes of calling (incoming unlimited)
 - 400 text messages (incoming unlimited)
