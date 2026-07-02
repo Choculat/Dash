@@ -60,14 +60,22 @@ object SmsPoolApiClient {
         post("esim/purchase", "key" to apiKey, "plan" to planId.toString()).mapCatching { text ->
             val o = JSONObject(text)
             if (o.optInt("success") == 1) o.getString("transactionId")
-            // SMSPool reports failures two ways: a top-level "message" (e.g. insufficient
-            // balance) or an "errors" array (e.g. a bad/missing parameter). Surface either.
-            else throw IOException(
-                o.optString("message").ifBlank {
-                    o.optJSONArray("errors")?.optJSONObject(0)?.optString("message").orEmpty()
-                }.ifBlank { "Purchase failed" }
-            )
+            else throw IOException(errorMessage(o, "Purchase failed"))
         }
+
+    /** Removes an eSIM from the account. */
+    suspend fun deleteEsim(apiKey: String, transactionId: String): Result<Unit> =
+        post("esim/delete", "key" to apiKey, "transactionId" to transactionId).mapCatching { text ->
+            val o = JSONObject(text)
+            if (o.optInt("success") != 1) throw IOException(errorMessage(o, "Couldn't remove eSIM"))
+        }
+
+    // SMSPool reports failures two ways: a top-level "message" (e.g. insufficient balance) or an
+    // "errors" array (e.g. a bad/missing parameter). Surface whichever is present.
+    private fun errorMessage(o: JSONObject, fallback: String): String =
+        o.optString("message").ifBlank {
+            o.optJSONArray("errors")?.optJSONObject(0)?.optString("message").orEmpty()
+        }.ifBlank { fallback }
 
     suspend fun getProfile(apiKey: String, transactionId: String): Result<EsimProfile> =
         post("esim/profile", "key" to apiKey, "transactionId" to transactionId).mapCatching { text ->

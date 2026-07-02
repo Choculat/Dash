@@ -20,6 +20,9 @@ import sh.margot.dash.databinding.CardSmspoolBinding
 import sh.margot.dash.databinding.ItemEsimBinding
 import sh.margot.dash.security.CredentialStore
 import sh.margot.dash.services.CardStateCache
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import sh.margot.dash.services.DisconnectTap
 import sh.margot.dash.services.ServiceCard
 
@@ -74,9 +77,11 @@ class SmsPoolCardController(private val context: Context) : ServiceCard {
 
     private var lastState: State? = null
     private lateinit var disconnectTap: DisconnectTap
+    private var cardView: View? = null
 
     override fun createView(inflater: LayoutInflater, parent: ViewGroup): View {
         val binding = CardSmspoolBinding.inflate(inflater, parent, false)
+        cardView = binding.root
         binding.connectButton.setOnClickListener {
             context.startActivity(Intent(context, SmsPoolLoginActivity::class.java))
         }
@@ -121,24 +126,28 @@ class SmsPoolCardController(private val context: Context) : ServiceCard {
     // so fetch a profile per eSIM in parallel to fill in "Data left".
     private suspend fun buildEntries(apiKey: String, json: JSONObject): List<EsimEntry> = coroutineScope {
         val arr = json.optJSONArray("data") ?: return@coroutineScope emptyList()
-        // Active eSIMs (status 2) first, then to-be-activated (1), then the rest.
         List(arr.length()) { i -> arr.getJSONObject(i) }
-            .sortedByDescending { it.optInt("status") }
             .map { e ->
                 async {
                     val txn = e.optString("transactionId")
                     val name = e.optString("name").ifBlank { e.optString("countryCode", "—") }
-                    val status = when (e.optInt("status")) {
-                        2 -> "Active"
-                        1 -> "To be activated"
+                    val expiry = e.optString("expiration", "—")
+                    // SMSPool's `status` never flips to "expired" — it stays 2 (active) — so an
+                    // eSIM is expired iff its expiration date has passed. Check that first.
+                    val status = when {
+                        isExpired(expiry) -> "Expired"
+                        e.optInt("status") == 2 -> "Active"
+                        e.optInt("status") == 1 -> "To be activated"
                         else -> "—"
                     }
                     val total = formatData(e.optDouble("dataInGb", 0.0))
                     val remaining = SmsPoolApiClient.getProfile(apiKey, txn).getOrNull()
                         ?.remainingData?.ifBlank { null }?.let { formatData(it) } ?: "—"
-                    EsimEntry(txn, name, status, "$remaining / $total", e.optString("expiration", "—"))
+                    EsimEntry(txn, name, status, "$remaining / $total", expiry)
                 }
             }.awaitAll()
+            // Active first, then to-be-activated, then expired/other last.
+            .sortedByDescending { statusRank(it.status) }
     }
 
     private fun applyState(binding: CardSmspoolBinding, state: State) {
@@ -157,6 +166,11 @@ class SmsPoolCardController(private val context: Context) : ServiceCard {
                         item.remainingText.text = entry.dataLeft
                         item.expiresText.text = entry.expiry
                         item.root.setOnClickListener { showInstallInfo(entry.transactionId) }
+                        // Hold to remove — expired eSIMs confirm once, still-valid ones twice.
+                        item.root.setOnLongClickListener {
+                            confirmRemove(entry.transactionId, expired = entry.status == "Expired")
+                            true
+                        }
                         binding.esimListContainer.addView(item.root)
                     }
                 }
@@ -187,6 +201,53 @@ class SmsPoolCardController(private val context: Context) : ServiceCard {
                 .onSuccess { EsimInstallDialog.show(activity, it) }
                 .onFailure { Toast.makeText(context, "Couldn't load install info", Toast.LENGTH_SHORT).show() }
         }
+    }
+
+    private fun confirmRemove(transactionId: String, expired: Boolean) {
+        if (!expired) {
+            // Still-valid eSIM: warn first, then fall through to the normal confirm.
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Remove active eSIM?")
+                .setMessage("This eSIM hasn't expired yet — removing it deletes it for good, with no refund.")
+                .setPositiveButton("Continue") { _, _ -> removeDialog(transactionId) }
+                .setNegativeButton("Cancel", null)
+                .show()
+        } else {
+            removeDialog(transactionId)
+        }
+    }
+
+    private fun removeDialog(transactionId: String) {
+        val apiKey = CredentialStore.getSecret(context, id) ?: return
+        val activity = context as AppCompatActivity
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Remove eSIM")
+            .setMessage("Remove this eSIM from your SMSPool account? This can't be undone.")
+            .setPositiveButton("Remove") { _, _ ->
+                activity.lifecycleScope.launch {
+                    SmsPoolApiClient.deleteEsim(apiKey, transactionId)
+                        .onSuccess {
+                            Toast.makeText(context, "eSIM removed", Toast.LENGTH_SHORT).show()
+                            cardView?.let { lastState = null; refresh(it) }
+                        }
+                        .onFailure { Toast.makeText(context, it.message ?: "Couldn't remove eSIM", Toast.LENGTH_LONG).show() }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun isExpired(expiration: String): Boolean = try {
+        val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val exp = fmt.parse(expiration.take(10))
+        val today = fmt.parse(fmt.format(Date()))
+        exp != null && today != null && !exp.after(today)
+    } catch (_: Exception) { false }
+
+    private fun statusRank(status: String) = when (status) {
+        "Active" -> 3
+        "To be activated" -> 2
+        else -> 1
     }
 
     private fun confirmDisconnect(binding: CardSmspoolBinding) {
